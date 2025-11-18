@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Book Manager</title>
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: #f2f2f2;
+        margin: 0;
+        padding: 20px;
+    }
+
+    h1 {
+        text-align: center;
+    }
+
+    .container {
+        max-width: 600px;
+        margin: auto;
+        background: #fff;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    input, button {
+        width: 100%;
+        padding: 10px;
+        margin: 8px 0;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+    }
+
+    button {
+        background: #007BFF;
+        color: #fff;
+        border: none;
+        cursor: pointer;
+        font-size: 16px;
+    }
+
+    button:hover {
+        background: #0056b3;
+    }
+
+    .book {
+        background: #f9f9f9;
+        padding: 10px;
+        margin-top: 10px;
+        border-left: 5px solid #007BFF;
+        border-radius: 5px;
+    }
+
+    .delete-btn {
+        background: red;
+        margin-top: 5px;
+    }
+</style>
+</head>
+
+<body>
+
+<h1>Book Manager</h1>
+
+<div class="container">
+    <h3>Add New Book</h3>
+    
+    <input type="text" id="title" placeholder="Enter Book Title">
+    <input type="text" id="author" placeholder="Enter Author Name">
+    <button onclick="addBook()">Add Book</button>
+
+    <h3>Book List</h3>
+    <div id="bookList"></div>
+</div>
+
+
+<script>
+const API_URL = "http://localhost:3000/books";
+
+// Fetch and display books
+function fetchBooks() {
+    fetch(API_URL)
+        .then(res => res.json())
+        .then(books => {
+            const list = document.getElementById("bookList");
+            list.innerHTML = "";
+
+            books.forEach(book => {
+                const div = document.createElement("div");
+                div.className = "book";
+                div.innerHTML = `
+                    <strong>${book.title}</strong><br>
+                    Author: ${book.author}<br>
+                    <button class="delete-btn" onclick="deleteBook(${book.id})">Delete</button>
+                `;
+                list.appendChild(div);
+            });
+        });
+}
+
+// Add a new book
+function addBook() {
+    const title = document.getElementById("title").value;
+    const author = document.getElementById("author").value;
+
+    if (!title || !author) {
+        alert("Please fill both fields");
+        return;
+    }
+
+    fetch(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title, author })
+    })
+    .then(res => res.json())
+    .then(data => {
+        alert("Book added!");
+        fetchBooks();
+    });
+}
+
+// Delete a book
+function deleteBook(id) {
+    fetch(`${API_URL}/${id}`, {
+        method: "DELETE"
+    })
+    .then(res => res.json())
+    .then(() => {
+        alert("Book deleted");
+        fetchBooks();
+    });
+}
+
+// Load books on page start
+fetchBooks();
+</script>
+
+</body>
+</html>
